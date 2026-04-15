@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cadastro — Rewoven</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .form-card {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 18px; padding: 28px;
+      display: flex; flex-direction: column; gap: 18px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 12px; color: var(--muted);
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 0.5px; background: var(--border);
+    }
+    .btn-full { width: 100%; justify-content: center; }
+    .terms { font-size: 12px; color: var(--muted); text-align: center; line-height: 1.6; }
+    .terms a { color: var(--blue); text-decoration: none; }
+    .benefit-row {
+      display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px;
+      animation: fadeUp 0.5s 0.05s ease both;
+    }
+    .benefit {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 13px; color: var(--muted);
+    }
+    .benefit-icon {
+      width: 32px; height: 32px; border-radius: 8px; flex-shrink: 0;
+      background: rgba(59,142,234,0.1); display: flex; align-items: center; justify-content: center;
+    }
+    .benefit-icon svg { width: 16px; height: 16px; stroke: var(--blue); fill: none; stroke-width: 2; }
+    .login-link {
+      text-align: center; font-size: 13px; color: var(--muted);
+      animation: fadeUp 0.5s 0.3s ease both;
+    }
+    .login-link a { color: var(--blue); text-decoration: none; font-weight: 500; }
+
+    /* success screen */
+    .success-screen {
+      display: none; text-align: center; padding: 40px 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .success-icon {
+      width: 64px; height: 64px; border-radius: 50%;
+      background: rgba(29,158,117,0.15); display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .success-icon svg { width: 32px; height: 32px; stroke: #1D9E75; fill: none; stroke-width: 2.5; }
+    .success-screen h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #fff; margin-bottom: 10px; }
+    .success-screen p { font-size: 14px; color: var(--muted); margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 0 0-8 8H2l3.5 3.5L9 12H7a5 5 0 0 1 5-5c1.38 0 2.63.56 3.54 1.46L17.65 6.35zM12 19a5 5 0 0 1-5-5c0-1.38.56-2.63 1.46-3.54L6.35 8.35A7.96 7.96 0 0 0 4 14a8 8 0 0 0 8 8 7.97 7.97 0 0 0 5.65-2.35l-1.42-1.42A5.01 5.01 0 0 1 12 19z"/></svg>
+      </div>
+      <span class="logo-name">Rewoven</span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">Início</a>
+      <a href="sobre.html">Sobre</a>
+      <a href="mapa.html">Mapa</a>
+      <a href="equipe.html">Equipe</a>
+      <a href="cadastro.html" class="btn-nav active">Cadastrar</a>
+    </nav>
+  </nav>
+
+  <div class="page-header">
+    <h1>Crie sua <span>conta!</span></h1>
+    <p>Cadastre-se e contribua para uma rede de descarte consciente ainda mais forte! Sua ajuda é necessária!</p>
+  </div>
+
+  <div class="content">
+
+    <div class="benefit-row">
+      <div class="benefit">
+        <div class="benefit-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg></div>
+        Receba alertas de pontos de reaproveitamento próximos a você
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon"><svg viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>
+        Contribua cadastrando novos pontos de coleta (brechós, loja própria, empresas de reaproveitamento)
+      </div>
+      <div class="benefit">
+        <div class="benefit-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        Faça parte da nossa comunidade!
+      </div>
+    </div>
+
+    <!-- Form -->
+    <div id="form-wrapper">
+      <div class="form-card">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Nome</label>
+            <input type="text" placeholder="Seu nome" id="nome" />
+          </div>
+          <div class="form-group">
+            <label>Sobrenome</label>
+            <input type="text" placeholder="Sobrenome" id="sobrenome" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>E-mail</label>
+          <input type="email" placeholder="seu@email.com" id="email" />
+        </div>
+
+        <div class="form-group">
+          <label>Senha</label>
+          <input type="password" placeholder="Mínimo 8 caracteres" id="senha" />
+        </div>
+
+        <div class="form-group">
+          <label>CEP (opcional)</label>
+          <input type="text" placeholder="00000-000" id="cep" maxlength="9" />
+        </div>
+
+        <div class="form-group">
+          <label>Tipo de usuário</label>
+          <select id="tipo">
+            <option value="">Selecione...</option>
+            <option value="pessoa">Pessoa física</option>
+            <option value="empresa">Empresa / Organização</option>
+            <option value="coletor">Ponto de coleta</option>
+          </select>
+        </div>
+
+        <button class="btn btn-primary btn-full" onclick="cadastrar()">
+          Criar conta grátis
+        </button>
+
+        <div class="divider">ou</div>
+
+        <p class="terms">
+          Ao se cadastrar, você concorda com os <a href="#">Termos de Uso</a> e a <a href="#">Política de Privacidade</a> da Rewoven.
+        </p>
+
+      </div>
+    </div>
+
+    <!-- Success screen (hidden) -->
+    <div class="success-screen" id="success-screen">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+      </div>
+      <h3>Conta criada!</h3>
+      <p>Bem-vindo(a) a Rewoven. Verifique seu e-mail para ativar a conta.</p>
+      <a href="mapa.html" class="btn btn-primary" style="display:inline-flex;">Ver pontos de coleta →</a>
+    </div>
+
+    <br>
+    <p class="login-link">Já tem uma conta? <a href="#">Entrar</a></p>
+
+  </div>
+
+  <footer>
+    <p>Rewoven &copy; 2026 — Projeto Maratona Tech &nbsp;·&nbsp; <a href="sobre.html">Sobre o projeto</a></p>
+  </footer>
+
+  <script>
+    // CEP mask
+    document.getElementById('cep').addEventListener('input', function() {
+      let v = this.value.replace(/\D/g, '').slice(0, 8);
+      if (v.length > 5) v = v.slice(0,5) + '-' + v.slice(5);
+      this.value = v;
+    });
+
+    function cadastrar() {
+      const nome = document.getElementById('nome').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const senha = document.getElementById('senha').value;
+      const tipo = document.getElementById('tipo').value;
+
+      if (!nome || !email || !senha || !tipo) {
+        alert('Por favor, preencha todos os campos obrigatórios.');
+        return;
+      }
+      if (senha.length < 8) {
+        alert('A senha deve ter pelo menos 8 caracteres.');
+        return;
+      }
+
+      document.getElementById('form-wrapper').style.display = 'none';
+      document.getElementById('success-screen').style.display = 'block';
+    }
+  </script>
+
+</body>
+</html>

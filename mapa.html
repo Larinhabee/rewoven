@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mapa — Rewoven</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .search-row {
+      display: flex; gap: 10px; margin-bottom: 20px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .search-row input {
+      flex: 1; background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 10px; padding: 12px 14px;
+      font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text);
+      outline: none; transition: border-color 0.2s;
+    }
+    .search-row input:focus { border-color: var(--blue); }
+    .search-row input::placeholder { color: var(--muted); }
+    .search-row button {
+      background: var(--blue); border: none; border-radius: 10px;
+      padding: 12px 18px; color: #fff; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+      transition: background 0.2s;
+    }
+    .search-row button:hover { background: var(--blue-dark); }
+
+    .filter-row {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.05s ease both;
+    }
+    .filter-btn {
+      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+    }
+    .filter-btn.on { background: var(--blue); color: #fff; border-color: var(--blue); }
+    .filter-btn:hover { border-color: var(--blue); color: var(--blue); }
+    .filter-btn.on:hover { background: var(--blue-dark); color: #fff; }
+
+    /* fake map */
+    .map-box {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 16px; overflow: hidden; position: relative;
+      height: 260px; margin-bottom: 20px;
+      animation: fadeUp 0.5s 0.1s ease both;
+    }
+    .map-bg {
+      width: 100%; height: 100%;
+      background:
+        repeating-linear-gradient(0deg, rgba(59,142,234,0.04) 0px, rgba(59,142,234,0.04) 1px, transparent 1px, transparent 40px),
+        repeating-linear-gradient(90deg, rgba(59,142,234,0.04) 0px, rgba(59,142,234,0.04) 1px, transparent 1px, transparent 40px);
+    }
+    .map-pin {
+      position: absolute; transform: translate(-50%, -100%);
+      display: flex; flex-direction: column; align-items: center; cursor: pointer;
+    }
+    .map-pin .pin-body {
+      width: 32px; height: 32px; border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg); display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .map-pin .pin-body svg { transform: rotate(45deg); width: 16px; height: 16px; fill: #fff; }
+    .map-pin .pin-label {
+      margin-top: 6px; font-size: 11px; font-weight: 600; color: var(--text);
+      background: var(--surface); padding: 3px 8px; border-radius: 6px;
+      border: 0.5px solid var(--border); white-space: nowrap;
+    }
+    .pin-blue .pin-body { background: var(--blue); }
+    .pin-teal .pin-body { background: #1D9E75; }
+    .map-legend {
+      position: absolute; bottom: 12px; right: 12px;
+      background: rgba(17,19,26,0.92); border: 0.5px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; font-size: 12px;
+    }
+    .map-legend div { display: flex; align-items: center; gap: 7px; color: var(--muted); margin-bottom: 4px; }
+    .map-legend div:last-child { margin-bottom: 0; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    .places-list { display: flex; flex-direction: column; gap: 12px; }
+    .place-card {
+      background: var(--surface); border: 0.5px solid var(--border);
+      border-radius: 14px; padding: 18px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .place-card:nth-child(2) { animation-delay: 0.07s; }
+    .place-card:nth-child(3) { animation-delay: 0.14s; }
+    .place-card:nth-child(4) { animation-delay: 0.21s; }
+    .place-card:nth-child(5) { animation-delay: 0.28s; }
+    .place-info h4 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+    .place-info p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+    .place-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag {
+      font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 6px;
+    }
+    .tag-roupas { background: rgba(59,142,234,0.12); color: var(--blue); }
+    .tag-eletro { background: rgba(29,158,117,0.12); color: #1D9E75; }
+    .tag-geral { background: rgba(186,117,23,0.12); color: #BA7517; }
+    .place-right { text-align: right; flex-shrink: 0; }
+    .dist { font-size: 13px; font-weight: 600; color: var(--blue); }
+    .place-right a {
+      display: block; margin-top: 8px; font-size: 12px; color: var(--muted);
+      text-decoration: underline; cursor: pointer;
+    }
+    .place-right a:hover { color: var(--blue); }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a class="nav-logo" href="index.html">
+      <div class="logo-icon">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35A7.96 7.96 0 0 0 12 4a8 8 0 0 0-8 8H2l3.5 3.5L9 12H7a5 5 0 0 1 5-5c1.38 0 2.63.56 3.54 1.46L17.65 6.35zM12 19a5 5 0 0 1-5-5c0-1.38.56-2.63 1.46-3.54L6.35 8.35A7.96 7.96 0 0 0 4 14a8 8 0 0 0 8 8 7.97 7.97 0 0 0 5.65-2.35l-1.42-1.42A5.01 5.01 0 0 1 12 19z"/></svg>
+      </div>
+      <span class="logo-name">Rewoven</span>
+    </a>
+    <nav class="nav-links">
+      <a href="index.html">Início</a>
+      <a href="sobre.html">Sobre</a>
+      <a href="mapa.html" class="active">Mapa</a>
+      <a href="equipe.html">Equipe</a>
+      <a href="cadastro.html" class="btn-nav">Cadastrar</a>
+    </nav>
+  </nav>
+
+  <div class="page-header">
+    <h1>Pontos de <span>coleta</span></h1>
+    <p>Encontre o ponto mais próximo para descartar roupas usadas e eletrônicos de forma responsável.</p>
+  </div>
+
+  <div class="content">
+
+    <div class="search-row">
+      <input type="text" placeholder="Digite seu endereço ou CEP..." id="search-input" />
+      <button onclick="buscar()">Buscar</button>
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn on" onclick="toggleFilter(this)">Todos</button>
+      <button class="filter-btn" onclick="toggleFilter(this)">Roupas</button>
+      <button class="filter-btn" onclick="toggleFilter(this)">Eletrônicos</button>
+      <button class="filter-btn" onclick="toggleFilter(this)">Até 1 km</button>
+      <button class="filter-btn" onclick="toggleFilter(this)">Aberto agora</button>
+    </div>
+
+    <!-- Fake interactive map -->
+    <div class="map-box">
+      <div class="map-bg"></div>
+
+      <div class="map-pin pin-blue" style="left:28%;top:42%">
+        <div class="pin-body"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+        <div class="pin-label">Brechó Solidário</div>
+      </div>
+      <div class="map-pin pin-teal" style="left:55%;top:55%">
+        <div class="pin-body"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+        <div class="pin-label">TechRecicla</div>
+      </div>
+      <div class="map-pin pin-blue" style="left:72%;top:35%">
+        <div class="pin-body"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+        <div class="pin-label">EcoVeste</div>
+      </div>
+      <div class="map-pin pin-teal" style="left:42%;top:72%">
+        <div class="pin-body"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+        <div class="pin-label">GreenDrop SP</div>
+      </div>
+
+      <div class="map-legend">
+        <div><span class="dot" style="background:var(--blue)"></span> Roupas</div>
+        <div><span class="dot" style="background:#1D9E75"></span> Eletrônicos</div>
+      </div>
+    </div>
+
+    <!-- Place cards -->
+    <div class="places-list" id="places-list">
+
+      <div class="place-card">
+        <div class="place-info">
+          <h4>Brechó Solidário Vila Madalena</h4>
+          <p>Rua Harmonia, 312 — Vila Madalena</p>
+          <p>Seg–Sáb · 9h às 18h</p>
+          <div class="place-tags">
+            <span class="tag tag-roupas">Roupas</span>
+            <span class="tag tag-geral">Calçados</span>
+          </div>
+        </div>
+        <div class="place-right">
+          <div class="dist">0.4 km</div>
+          <a href="#">Ver no mapa</a>
+        </div>
+      </div>
+
+      <div class="place-card">
+        <div class="place-info">
+          <h4>TechRecicla Pinheiros</h4>
+          <p>Av. Brigadeiro Faria Lima, 1811</p>
+          <p>Seg–Sex · 8h às 17h</p>
+          <div class="place-tags">
+            <span class="tag tag-eletro">Eletrônicos</span>
+            <span class="tag tag-eletro">Pilhas</span>
+          </div>
+        </div>
+        <div class="place-right">
+          <div class="dist">0.9 km</div>
+          <a href="#">Ver no mapa</a>
+        </div>
+      </div>
+
+      <div class="place-card">
+        <div class="place-info">
+          <h4>EcoVeste — Ponto Móvel</h4>
+          <p>Praça Benedito Calixto — aos sábados</p>
+          <p>Sábados · 9h às 14h</p>
+          <div class="place-tags">
+            <span class="tag tag-roupas">Roupas</span>
+            <span class="tag tag-roupas">Acessórios</span>
+          </div>
+        </div>
+        <div class="place-right">
+          <div class="dist">1.3 km</div>
+          <a href="#">Ver no mapa</a>
+        </div>
+      </div>
+
+      <div class="place-card">
+        <div class="place-info">
+          <h4>GreenDrop Consolação</h4>
+          <p>Rua da Consolação, 2423 — Cerqueira César</p>
+          <p>Seg–Dom · 10h às 20h</p>
+          <div class="place-tags">
+            <span class="tag tag-roupas">Roupas</span>
+            <span class="tag tag-eletro">Eletrônicos</span>
+          </div>
+        </div>
+        <div class="place-right">
+          <div class="dist">1.8 km</div>
+          <a href="#">Ver no mapa</a>
+        </div>
+      </div>
+
+      <div class="place-card">
+        <div class="place-info">
+          <h4>SENAI — Coleta de Eletrônicos</h4>
+          <p>Rua dos Morós, 501 — Barra Funda</p>
+          <p>Seg–Sex · 8h às 17h</p>
+          <div class="place-tags">
+            <span class="tag tag-eletro">Eletrônicos</span>
+            <span class="tag tag-eletro">Cabos</span>
+            <span class="tag tag-eletro">Baterias</span>
+          </div>
+        </div>
+        <div class="place-right">
+          <div class="dist">2.2 km</div>
+          <a href="#">Ver no mapa</a>
+        </div>
+      </div>
+
+    </div>
+
+    <br>
+    <div style="text-align:center;">
+      <a href="cadastro.html" class="btn btn-ghost">Cadastrar novo ponto de coleta</a>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Rewoven &copy; 2026 — Projeto Maratona Tech &nbsp;·&nbsp; <a href="equipe.html">Conheça a equipe</a></p>
+  </footer>
+
+  <script>
+    function toggleFilter(btn) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+    }
+    function buscar() {
+      const val = document.getElementById('search-input').value.trim();
+      if (val) alert('Buscando pontos próximos a: ' + val);
+    }
+  </script>
+
+</body>
+</html>
